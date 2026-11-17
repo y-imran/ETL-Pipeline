@@ -39,17 +39,15 @@ def transform_products(df):
 # Orders
 # ---------------------------------------------------------------------------
 def parse_dates(df):
-    """Convert the order date columns to real datetimes.
-
-    The CSV format is day-first, e.g. 12-11-2026 is 12 November 2026.
-    Giving the exact format keeps every value readable (pandas stops
-    guessing and would otherwise read 12-11 as 11 December).
-    """
+    """Convert the order date columns to real datetimes (day-first CSV format)."""
     df = df.copy()
 
-    df["order_date"] = pd.to_datetime(df["order_date"], format="%d-%m-%Y", errors="coerce")
-    df["created_at"] = pd.to_datetime(df["created_at"], format="%d-%m-%Y %H:%M:%S", errors="coerce")
-    df["updated_at"] = pd.to_datetime(df["updated_at"], format="%d-%m-%Y %H:%M:%S", errors="coerce")
+    # Every order column is written in the same day-first format "with time",
+    # e.g. 01-10-2026 09:15:00 -> 1 October 2026 at 09:15. Giving the exact
+    # format keeps every value readable (pandas stops guessing and would
+    # otherwise read 12-11 as 11 December).
+    for column in ("order_date", "created_at", "updated_at"):
+        df[column] = pd.to_datetime(df[column], format="%d-%m-%Y %H:%M:%S", errors="coerce")
 
     return df
 

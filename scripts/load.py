@@ -68,7 +68,7 @@ def upsert(connection, table_name, df, key_column):
 # --------------------------------------------------
 # 2. Watermark: Get the last loaded updated_at value
 # --------------------------------------------------
-def get_watermark(connection):
+def get_watermark(connection, oldest_order_created_at):
     """Return the newest updated_at already loaded for orders."""
 
     result = connection.execute(text("""
@@ -77,9 +77,25 @@ def get_watermark(connection):
         WHERE pipeline_name = 'orders'
     """)).scalar()
 
-    # No bookmark yet (fresh database): start from 1970 so the first
     # incremental run loads every order.
-    return pd.Timestamp(result) if result else pd.Timestamp("2026-11-01")
+    if result:
+        return pd.Timestamp(result)
+
+    return pd.Timestamp(oldest_order_created_at)
+
+
+def get_oldest_order_date(connection):
+    """Return the oldest created_at found in raw_orders"""
+
+    result = connection.execute(text("""
+        SELECT MIN(created_at)
+        FROM raw_orders
+    """)).scalar()
+
+    if not result:
+        raise ValueError("No orders founds")
+
+    return result
 
 
 # --------------------------------------------------
@@ -218,7 +234,8 @@ def load_incremental(raw_tables, staging_tables):
         load_products(connection, raw_tables["products"], staging_tables["products"])
 
         # Get the last saved watermark.
-        last_watermark = get_watermark(connection)
+        oldest_order_date = get_oldest_order_date(connection)
+        last_watermark = get_watermark(connection, oldest_order_date)
 
         # Keep only orders modified after the last watermark.
         orders = staging_tables["orders"]

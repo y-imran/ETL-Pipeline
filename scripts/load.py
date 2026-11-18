@@ -79,7 +79,7 @@ def get_watermark(connection):
 
     # No bookmark yet (fresh database): start from 1970 so the first
     # incremental run loads every order.
-    return pd.Timestamp(result) if result else pd.Timestamp("1970-01-01")
+    return pd.Timestamp(result) if result else pd.Timestamp("2026-11-01")
 
 
 # --------------------------------------------------

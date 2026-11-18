@@ -5,7 +5,7 @@ import pandas as pd
 # Customers
 # ---------------------------------------------------------------------------
 def transform_customers(df):
-    df = df.copy()
+    df = df.copy() 
 
     # Capitalize the first letter of each word.
     for column in ("customer_name", "city"):

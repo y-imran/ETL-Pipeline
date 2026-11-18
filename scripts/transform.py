@@ -44,8 +44,7 @@ def parse_dates(df):
 
     # Every order column is written in the same day-first format "with time",
     # e.g. 01-10-2026 09:15:00 -> 1 October 2026 at 09:15. Giving the exact
-    # format keeps every value readable (pandas stops guessing and would
-    # otherwise read 12-11 as 11 December).
+    # format keeps every value readable
     for column in ("order_date", "created_at", "updated_at"):
         df[column] = pd.to_datetime(df[column], format="%d-%m-%Y %H:%M:%S", errors="coerce")
 
